@@ -102,6 +102,16 @@
                     $(this).appendTo('body');
                 }
             });
+            $('.modal-dialog > .modal-footer').each(function () {
+                var footer = $(this);
+                var content = footer.siblings('.modal-content').first();
+                if (!content.length) return;
+                var form = content.find('form').first();
+                footer.appendTo(content);
+                if (form.length && form.attr('id')) {
+                    footer.find('button[type="submit"]').attr('form', form.attr('id'));
+                }
+            });
         });
     </script>
     @stack('scripts')

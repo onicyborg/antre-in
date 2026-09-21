@@ -10,13 +10,13 @@ Persyaratan: PHP 8.2, Composer, database yang didukung Laravel, dan ekstensi PHP
 composer install
 cp .env.example .env
 php artisan key:generate
-# isi DB_*, APP_URL, ASSET_URL, APP_TIMEZONE, serta ADMIN_EMAIL/ADMIN_PASSWORD di .env
+# isi DB_*, APP_URL, ASSET_URL, dan APP_TIMEZONE di .env
 php artisan migrate:fresh --seed
 php artisan storage:link
 php artisan serve
 ```
 
-`ADMIN_EMAIL` dan `ADMIN_PASSWORD` dibaca oleh `AdminSeeder`. Jika salah satu kosong, akun admin dilewati dan Artisan menampilkan pesan. Jangan commit kredensial. Asset Otika dimuat dari `ASSET_URL`, sedangkan file aplikasi di `storage/app/public` dipanggil melalui URL lokal `storage/...`.
+`AdminSeeder` membuat akun awal berikut: `admin@example.com` dan `kasir@example.com`, keduanya memakai password `Qwerty123*`. Ganti atau nonaktifkan akun tersebut sebelum deployment produksi. Asset Otika dimuat dari `ASSET_URL`, sedangkan file aplikasi di `storage/app/public` dipanggil melalui URL lokal `storage/...`.
 
 ## Scheduler dan deployment
 

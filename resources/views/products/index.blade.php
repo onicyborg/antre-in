@@ -1,6 +1,18 @@
 @extends('layouts.app')
 @section('title', 'Produk')
-@push('styles')<link rel="stylesheet" href="{{ asset('bundles/datatables/datatables.min.css') }}">@endpush
+@push('styles')
+<link rel="stylesheet" href="{{ asset('bundles/datatables/datatables.min.css') }}">
+<style>
+    .product-image-preview { display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; padding: 3px; border: 1px solid #e4e7f2; border-radius: 7px; background: #f8f9ff; cursor: zoom-in; }
+    .product-image-preview img { width: 44px; height: 44px; object-fit: cover; border-radius: 5px; }
+    #productImageModal .modal-content { background: #111827; }
+    #productImageModal .modal-header { border-bottom: 1px solid rgba(255,255,255,.15); background: #111827; color: #fff; }
+    #productImageModal .modal-title { color: #fff; }
+    #productImageModal .modal-header .close { color: #fff; opacity: .9; }
+    #productImageModal .modal-body { display: flex; align-items: center; justify-content: center; min-height: 70vh; padding: 20px; }
+    #productImagePreview { max-width: 100%; max-height: calc(100vh - 170px); object-fit: contain; }
+</style>
+@endpush
 @push('vendor-scripts')<script src="{{ asset('bundles/datatables/datatables.min.js') }}"></script>@endpush
 @section('content')
 <div class="section-header"><h1>Produk</h1><div class="section-header-breadcrumb"><div class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></div><div class="breadcrumb-item active">Produk</div></div></div>
@@ -9,6 +21,14 @@
 <div class="row"><div class="col-md-6"><div class="form-group"><label for="product_name">Nama produk</label><input id="product_name" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" required>@error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror</div><div class="form-group"><label for="product_sku">SKU</label><input id="product_sku" name="sku" class="form-control @error('sku') is-invalid @enderror" value="{{ old('sku') }}" maxlength="50" required>@error('sku')<div class="invalid-feedback">{{ $message }}</div>@enderror</div><div class="form-group"><label for="product_barcode">Barcode <small class="text-muted">(opsional)</small></label><input id="product_barcode" name="barcode" class="form-control @error('barcode') is-invalid @enderror" value="{{ old('barcode') }}" maxlength="64">@error('barcode')<div class="invalid-feedback">{{ $message }}</div>@enderror</div><div class="form-row"><div class="form-group col-md-6"><label for="product_category">Kategori</label><select id="product_category" name="category_id" class="form-control @error('category_id') is-invalid @enderror" required><option value="">Pilih kategori</option>@foreach ($categories as $category)<option value="{{ $category->id }}" @selected(old('category_id') === $category->id)>{{ $category->name }}</option>@endforeach</select>@error('category_id')<div class="invalid-feedback">{{ $message }}</div>@enderror</div><div class="form-group col-md-6"><label for="product_unit">Satuan</label><select id="product_unit" name="unit_id" class="form-control @error('unit_id') is-invalid @enderror" required><option value="">Pilih satuan</option>@foreach ($units as $unit)<option value="{{ $unit->id }}" @selected(old('unit_id') === $unit->id)>{{ $unit->name }}</option>@endforeach</select>@error('unit_id')<div class="invalid-feedback">{{ $message }}</div>@enderror</div></div></div>
 <div class="col-md-6"><div class="form-row"><div class="form-group col-6"><label for="product_cost">Harga beli</label><input id="product_cost" type="number" min="0" name="cost_price" class="form-control @error('cost_price') is-invalid @enderror" value="{{ old('cost_price', 0) }}" required>@error('cost_price')<div class="invalid-feedback">{{ $message }}</div>@enderror</div><div class="form-group col-6"><label for="product_sell">Harga jual</label><input id="product_sell" type="number" min="0" name="sell_price" class="form-control @error('sell_price') is-invalid @enderror" value="{{ old('sell_price') }}" required>@error('sell_price')<div class="invalid-feedback">{{ $message }}</div>@enderror</div></div><div id="priceWarning" class="alert alert-warning d-none" role="alert">Harga jual lebih rendah daripada harga beli.</div><div class="form-group"><label for="product_stock">Stok awal / stok saat ini</label><input id="product_stock" type="number" min="0" name="stock_initial" class="form-control @error('stock_initial') is-invalid @enderror" value="{{ old('stock_initial', 0) }}" required><small id="stockHint" class="form-text text-muted">Stok awal hanya dicatat saat produk dibuat.</small>@error('stock_initial')<div class="invalid-feedback">{{ $message }}</div>@enderror</div><div class="form-group"><label for="product_min_stock">Stok minimum</label><input id="product_min_stock" type="number" min="0" name="min_stock" class="form-control @error('min_stock') is-invalid @enderror" value="{{ old('min_stock', 0) }}" required>@error('min_stock')<div class="invalid-feedback">{{ $message }}</div>@enderror</div><div class="form-group"><label for="product_image">Gambar produk</label><input id="product_image" type="file" name="image" accept=".jpg,.jpeg,.png,.webp" class="form-control-file @error('image') is-invalid @enderror"><small class="form-text text-muted">JPG, JPEG, PNG, atau WEBP; maksimal 2 MB.</small>@error('image')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror</div><div class="form-group"><div class="custom-control custom-checkbox"><input type="hidden" name="is_active" value="0"><input id="product_active" type="checkbox" name="is_active" value="1" class="custom-control-input" {{ old('is_active', '1') ? 'checked' : '' }}><label class="custom-control-label" for="product_active">Produk aktif</label></div>@error('is_active')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror</div></div></div></div></div><div class="modal-footer"><button type="button" class="btn btn-light" data-dismiss="modal">Batal</button><button class="btn btn-primary" type="submit">Simpan</button></div></form></div></div></div>
 @include('partials.delete-modal')
+<div class="modal fade" id="productImageModal" tabindex="-1" role="dialog" aria-labelledby="productImageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title" id="productImageModalLabel">Preview gambar produk</h5><button type="button" class="close" data-dismiss="modal" aria-label="Tutup"><span aria-hidden="true">&times;</span></button></div>
+            <div class="modal-body"><img id="productImagePreview" src="" alt="Preview gambar produk"></div>
+        </div>
+    </div>
+</div>
 @endsection
 @push('scripts')<script>
 $(function () { $('#products-table').DataTable({ pageLength: 10, order: [[2, 'asc']], responsive: true }); const form = $('#productForm'); function priceWarning () { const cost = Number($('#product_cost').val() || 0); const sell = Number($('#product_sell').val() || 0); $('#priceWarning').toggleClass('d-none', !(sell < cost)); } $('#product_cost, #product_sell').on('input', priceWarning); $('.btn-edit-product').on('click', function () { const b = $(this); $('#modalProductLabel').text('Edit produk'); form.attr('action', '{{ url('/products') }}/' + b.data('id')); $('#product_method').val('PUT'); $('#product_form').val('edit'); $('#product_id').val(b.data('id')); $('#product_category').val(b.data('category')); $('#product_unit').val(b.data('unit')); $('#product_sku').val(b.data('sku')); $('#product_barcode').val(b.data('barcode')); $('#product_name').val(b.data('name')); $('#product_cost').val(b.data('cost')); $('#product_sell').val(b.data('sell')); $('#product_stock').val(b.data('stock')).prop('readonly', true); $('#stockHint').text('Stok read-only. Ubah stok melalui modul Stok.'); $('#product_min_stock').val(b.data('min-stock')); $('#product_active').prop('checked', String(b.data('active')) === '1'); priceWarning(); }); $('.btn-delete').on('click', function () { $('#deleteName').text($(this).data('name')); $('#deleteForm').attr('action', $(this).data('url')); }); @if (old('_form') === 'create' || old('_form') === 'edit') $('#modalProductLabel').text('{{ old('_form') === 'edit' ? 'Edit produk' : 'Tambah produk' }}'); form.attr('action', '{{ old('_form') === 'edit' ? url('/products').'/'.old('_id') : route('products.store') }}'); $('#product_method').val('{{ old('_form') === 'edit' ? 'PUT' : '' }}'); $('#product_stock').prop('readonly', '{{ old('_form') === 'edit' ? 'true' : 'false' }}' === 'true'); $('#modalProduct').modal('show'); priceWarning(); @endif });
@@ -17,6 +37,22 @@ $(function () { $('#products-table').DataTable({ pageLength: 10, order: [[2, 'as
 <script>
 $(function () {
     $('.card-header-action button[data-target="#modalProduct"]').on('click', function () { const form = $('#productForm'); form[0].reset(); $('#modalProductLabel').text('Tambah produk'); form.attr('action', '{{ route('products.store') }}'); $('#product_method').val(''); $('#product_form').val('create'); $('#product_id').val(''); $('#product_stock').prop('readonly', false); $('#stockHint').text('Stok awal hanya dicatat saat produk dibuat.'); $('#product_active').prop('checked', true); $('#priceWarning').addClass('d-none'); });
+});
+</script>
+@endpush
+@push('scripts')
+<script>
+$(function () {
+    $('#products-table tbody img[alt^="Gambar "]').each(function () {
+        var image = $(this);
+        var button = $('<button type="button" class="product-image-preview" data-toggle="modal" data-target="#productImageModal"></button>');
+        button.attr('data-image', image.attr('src')).attr('data-name', image.attr('alt')).attr('aria-label', 'Lihat gambar ' + image.attr('alt').replace(/^Gambar /, '')).attr('title', 'Lihat gambar produk');
+        image.wrap(button);
+    });
+    $(document).on('click', '.product-image-preview', function () {
+        $('#productImagePreview').attr('src', $(this).data('image')).attr('alt', $(this).data('name'));
+        $('#productImageModalLabel').text($(this).data('name'));
+    });
 });
 </script>
 @endpush

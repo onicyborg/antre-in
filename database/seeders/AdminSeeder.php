@@ -11,25 +11,33 @@ class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        $email = trim((string) env('ADMIN_EMAIL', ''));
-        $password = (string) env('ADMIN_PASSWORD', '');
+        $password = 'Qwerty123*';
 
-        if ($email === '' || $password === '') {
-            $this->command?->warn('AdminSeeder dilewati: ADMIN_EMAIL dan ADMIN_PASSWORD wajib diisi pada .env.');
+        $users = [
+            [
+                'email' => 'admin@example.com',
+                'name' => 'Administrator',
+                'role' => UserRole::Admin,
+            ],
+            [
+                'email' => 'kasir@example.com',
+                'name' => 'Kasir',
+                'role' => UserRole::Kasir,
+            ],
+        ];
 
-            return;
+        foreach ($users as $user) {
+            User::updateOrCreate(
+                ['email' => $user['email']],
+                [
+                    'name' => $user['name'],
+                    'password' => Hash::make($password),
+                    'role' => $user['role'],
+                    'is_active' => true,
+                ],
+            );
         }
 
-        User::updateOrCreate(
-            ['email' => $email],
-            [
-                'name' => 'Administrator',
-                'password' => Hash::make($password),
-                'role' => UserRole::Admin,
-                'is_active' => true,
-            ],
-        );
-
-        $this->command?->info('Admin awal berhasil disiapkan.');
+        $this->command?->info('Akun awal berhasil disiapkan: admin@example.com dan kasir@example.com.');
     }
 }

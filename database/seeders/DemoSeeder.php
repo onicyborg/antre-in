@@ -3,15 +3,12 @@
 namespace Database\Seeders;
 
 use App\Enums\StockMovementType;
-use App\Enums\UserRole;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\StockService;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class DemoSeeder extends Seeder
 {
@@ -28,20 +25,7 @@ class DemoSeeder extends Seeder
         $units = collect(['pcs', 'botol', 'box'])
             ->mapWithKeys(fn (string $name) => [$name => Unit::firstOrCreate(['name' => $name])]);
 
-        $kasirPassword = (string) env('DEMO_KASIR_PASSWORD', '');
-        if ($kasirPassword === '') {
-            $kasirPassword = Str::random(16);
-        }
-
-        $kasir = User::updateOrCreate(
-            ['email' => 'kasir.demo@example.test'],
-            [
-                'name' => 'Kasir Demo',
-                'password' => Hash::make($kasirPassword),
-                'role' => UserRole::Kasir,
-                'is_active' => true,
-            ],
-        );
+        $kasir = User::where('email', 'kasir@example.com')->firstOrFail();
 
         $names = [
             'Kopi Susu Gula Aren', 'Teh Melati Botol', 'Air Mineral', 'Jus Jambu', 'Cokelat Panas',
@@ -74,7 +58,6 @@ class DemoSeeder extends Seeder
             }
         }
 
-        $this->command?->info('Demo lokal dibuat: 5 kategori, 3 satuan, 30 produk, dan 1 kasir demo.');
-        $this->command?->warn("Kredensial kasir demo: kasir.demo@example.test / {$kasirPassword}");
+        $this->command?->info('Demo lokal dibuat: 5 kategori, 3 satuan, dan 30 produk.');
     }
 }
