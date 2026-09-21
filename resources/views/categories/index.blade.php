@@ -1,0 +1,22 @@
+@extends('layouts.app')
+@section('title', 'Kategori')
+@push('styles')<link rel="stylesheet" href="{{ asset('bundles/datatables/datatables.min.css') }}">@endpush
+@push('vendor-scripts')<script src="{{ asset('bundles/datatables/datatables.min.js') }}"></script>@endpush
+@section('content')
+<div class="section-header"><h1>Kategori</h1><div class="section-header-breadcrumb"><div class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></div><div class="breadcrumb-item active">Kategori</div></div></div>
+<div class="section-body"><div class="card"><div class="card-header"><h4>Daftar kategori</h4><div class="card-header-action"><button class="btn btn-primary btn-add-category" type="button" data-toggle="modal" data-target="#modalCategory"><i class="fas fa-plus"></i> Tambah kategori</button></div></div><div class="card-body"><div class="table-responsive"><table class="table table-striped" id="categories-table"><thead><tr><th>Nama</th><th>Jumlah produk</th><th>Aksi</th></tr></thead><tbody>@forelse ($categories as $category)<tr><td>{{ $category->name }}</td><td>{{ $category->products_count }}</td><td class="text-nowrap"><button class="btn btn-sm btn-outline-primary btn-edit-category" type="button" data-toggle="modal" data-target="#modalCategory" data-id="{{ $category->id }}" data-name="{{ $category->name }}"><i class="fas fa-edit"></i> Edit</button> <button class="btn btn-sm btn-outline-danger btn-delete" type="button" data-toggle="modal" data-target="#modalDelete" data-id="{{ $category->id }}" data-name="{{ $category->name }}" data-url="{{ route('categories.destroy', $category) }}"><i class="fas fa-trash"></i> Hapus</button></td></tr>@empty<tr><td colspan="3" class="text-center py-4">Belum ada kategori.</td></tr>@endforelse</tbody></table></div></div></div></div>
+<div class="modal fade" id="modalCategory" tabindex="-1" role="dialog" aria-labelledby="modalCategoryLabel" aria-hidden="true"><div class="modal-dialog" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="modalCategoryLabel">Tambah kategori</h5><button type="button" class="close" data-dismiss="modal" aria-label="Tutup"><span aria-hidden="true">&times;</span></button></div><form id="categoryForm" method="POST" action="{{ route('categories.store') }}"><div class="modal-body">@csrf<input type="hidden" name="_form" id="category_form" value="{{ old('_form') }}"><input type="hidden" name="_id" id="category_id" value="{{ old('_id') }}"><input type="hidden" name="_method" id="category_method" value=""><div class="form-group"><label for="category_name">Nama kategori</label><input id="category_name" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" maxlength="100" required>@error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror</div></div><div class="modal-footer"><button type="button" class="btn btn-light" data-dismiss="modal">Batal</button><button class="btn btn-primary" type="submit">Simpan</button></div></form></div></div></div>
+@include('partials.delete-modal')
+@endsection
+@push('scripts')
+<script>
+$(function () {
+    $('#categories-table').DataTable({ pageLength: 10, order: [[0, 'asc']], responsive: true });
+    const form = $('#categoryForm');
+    $('.btn-add-category').on('click', function () { form[0].reset(); $('#modalCategoryLabel').text('Tambah kategori'); form.attr('action', '{{ route('categories.store') }}'); $('#category_method').val(''); $('#category_form').val('create'); $('#category_id').val(''); });
+    $('.btn-edit-category').on('click', function () { const b = $(this); $('#modalCategoryLabel').text('Edit kategori'); form.attr('action', '{{ url('/categories') }}/' + b.data('id')); $('#category_method').val('PUT'); $('#category_form').val('edit'); $('#category_id').val(b.data('id')); $('#category_name').val(b.data('name')); });
+    $('.btn-delete').on('click', function () { $('#deleteName').text($(this).data('name')); $('#deleteForm').attr('action', $(this).data('url')); });
+    @if (old('_form') === 'create' || old('_form') === 'edit') $('#modalCategoryLabel').text('{{ old('_form') === 'edit' ? 'Edit kategori' : 'Tambah kategori' }}'); form.attr('action', '{{ old('_form') === 'edit' ? url('/categories').'/'.old('_id') : route('categories.store') }}'); $('#category_method').val('{{ old('_form') === 'edit' ? 'PUT' : '' }}'); $('#modalCategory').modal('show'); @endif
+});
+</script>
+@endpush
